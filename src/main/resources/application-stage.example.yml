@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  activemq:
+    broker-url: ${ACTIVEMQ_URL}
+
+notification:
+  solapi:
+    api-key: ${SOLAPI_API_KEY}
+    api-secret: ${SOLAPI_API_SECRET}
+    from-number: ${SOLAPI_FROM_NUMBER}
+  nurigo:
+    api-key: ${NURIGO_API_KEY}
+    api-secret: ${NURIGO_API_SECRET}
+    from-number: ${NURIGO_FROM_NUMBER}
+  ses:
+    region: ${AWS_REGION:ap-northeast-2}
+    from-email: ${SES_FROM_EMAIL}
+  fingerpush:
+    api-key: ${FINGERPUSH_API_KEY}
+    app-id: ${FINGERPUSH_APP_ID}
+  slack:
+    webhook-url: ${SLACK_WEBHOOK_URL}
+  stage:
+    allowed-domains: ${STAGE_ALLOWED_DOMAINS:example.com}

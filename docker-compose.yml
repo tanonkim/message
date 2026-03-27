@@ -1,0 +1,15 @@
+services:
+  activemq:
+    image: apache/activemq-classic:latest
+    container_name: message-activemq
+    ports:
+      - "61616:61616"  # 브로커 포트 (앱 연결)
+      - "8161:8161"    # 웹 콘솔 (http://localhost:8161)
+    environment:
+      ACTIVEMQ_ADMIN_LOGIN: admin
+      ACTIVEMQ_ADMIN_PASSWORD: admin
+    volumes:
+      - activemq-data:/var/lib/activemq/data
+
+volumes:
+  activemq-data:

@@ -1,0 +1,35 @@
+spring:
+  profiles:
+    active: local
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+  activemq:
+    broker-url: tcp://localhost:61616
+    user: your-activemq-user
+    password: your-activemq-password
+
+notification:
+  crypto:
+    key: ${CRYPTO_KEY:your-32-char-crypto-key-here-xxxx}
+    iv: ${CRYPTO_IV:your-16char-iv-xx}
+  api-keys:
+    wello-api: ${API_KEY_WELLO:your-wello-api-key}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.message: DEBUG
+    org.springframework.jms: INFO
