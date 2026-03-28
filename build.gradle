@@ -28,6 +28,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-activemq'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
 
     // AWS SES V2
     implementation platform('software.amazon.awssdk:bom:2.25.0')
@@ -39,6 +40,10 @@ dependencies {
     // Jackson
     implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+    // querydsl
+    implementation 'io.github.openfeign.querydsl:querydsl-jpa:6.12'
+    annotationProcessor "io.github.openfeign.querydsl:querydsl-apt:6.12:jpa"
 
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.mysql:mysql-connector-j'
