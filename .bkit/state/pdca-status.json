@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-03-28T04:22:47.075Z",
+  "lastUpdated": "2026-03-28T04:40:58.397Z",
   "activeFeatures": [
     "config",
     "request",
@@ -57,7 +57,7 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-28T04:22:28.586Z",
-        "lastUpdated": "2026-03-28T04:22:47.075Z"
+        "lastUpdated": "2026-03-28T04:40:58.397Z"
       },
       "lastFile": "/Users/tanonkim/Documents/study/flab/backend/message/src/test/java/com/message/domain/notification/service/NotificationServiceTest.java"
     }
@@ -70,7 +70,7 @@
   "session": {
     "startedAt": "2026-03-26T06:09:31.729Z",
     "onboardingCompleted": false,
-    "lastActivity": "2026-03-28T04:22:47.075Z"
+    "lastActivity": "2026-03-28T04:40:58.397Z"
   },
   "history": [
     {
@@ -99,6 +99,30 @@
     },
     {
       "timestamp": "2026-03-28T04:22:47.075Z",
+      "feature": "service",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-28T04:37:28.769Z",
+      "feature": "service",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-28T04:37:50.897Z",
+      "feature": "service",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-28T04:40:20.268Z",
+      "feature": "service",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-28T04:40:58.397Z",
       "feature": "service",
       "phase": "do",
       "action": "updated"

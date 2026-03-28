@@ -85,4 +85,10 @@ public class NotificationLog {
         this.createAt = LocalDateTime.now();
     }
 
+    public void markFailed(String errorMessage) {
+        this.status = NotificationStatus.FAILED;
+        this.errorMessage = errorMessage;
+        this.retryCount++;
+    }
+
 }
