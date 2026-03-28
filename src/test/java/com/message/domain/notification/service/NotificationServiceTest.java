@@ -9,6 +9,8 @@ import com.message.domain.notification.enums.NotificationChannel;
 import com.message.domain.notification.enums.NotificationStatus;
 import com.message.domain.notification.repository.DetailNotificaionLogRepository;
 import com.message.domain.notification.repository.NotificationLogRepository;
+import com.message.global.exception.ApiException;
+import com.message.global.exception.ErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +19,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jms.core.JmsTemplate;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -93,6 +98,34 @@ class NotificationServiceTest {
         verify(jmsTemplate, never()).convertAndSend(anyString(), any(Object.class));
     }
 
+    @Test
+    @DisplayName("중복 idempotencyKey 요청 시 409 반환")
+    void request_duplicate() {
+        // given
+        NotificationRequest request = createRequest("SMS", "HIGH", "01012345678", "dup-key");
+        given(detailNotificaionLogRepository.existsByIdempotencyKey("dup-key")).willReturn(true);
+        given(detailNotificaionLogRepository.findByIdempotencyKey("dup-key"))
+                .willReturn(Optional.of(mock(NotificationLog.class)));
+
+        // when & then
+        assertThatThrownBy(() -> notificationService.request(request))
+                .isInstanceOf(ApiException.class)
+                .satisfies(e -> assertThat(((ApiException) e).getErrorCode())
+                        .isEqualTo(ErrorCode.DUPLICATE_REQUEST));
+
+        verify(jmsTemplate, never()).convertAndSend(anyString(), any(Object.class));
+    }
+
+    @Test
+    @DisplayName("잘못된 채널 요청 시 400 반환")
+    void request_invalidChannel() {
+        NotificationRequest request = createRequest("KAKAO", "HIGH", "01012345678", null);
+
+        assertThatThrownBy(() -> notificationService.request(request))
+                .isInstanceOf(ApiException.class)
+                .satisfies(e -> assertThat(((ApiException) e).getErrorCode())
+                        .isEqualTo(ErrorCode.INVALID_CHANNEL));
+    }
 
 
 }
