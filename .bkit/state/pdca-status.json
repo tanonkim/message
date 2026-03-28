@@ -1,9 +1,25 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-03-26T06:09:31.729Z",
-  "activeFeatures": [],
-  "primaryFeature": null,
-  "features": {},
+  "lastUpdated": "2026-03-28T02:59:44.714Z",
+  "activeFeatures": [
+    "config"
+  ],
+  "primaryFeature": "config",
+  "features": {
+    "config": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-28T02:59:44.714Z",
+        "lastUpdated": "2026-03-28T02:59:44.714Z"
+      },
+      "lastFile": "/Users/tanonkim/Documents/study/flab/backend/message/src/main/java/com/message/global/config/JacksonConfig.java"
+    }
+  },
   "pipeline": {
     "currentPhase": 1,
     "level": "Dynamic",
@@ -12,7 +28,14 @@
   "session": {
     "startedAt": "2026-03-26T06:09:31.729Z",
     "onboardingCompleted": false,
-    "lastActivity": "2026-03-26T06:09:31.729Z"
+    "lastActivity": "2026-03-28T02:59:44.714Z"
   },
-  "history": []
+  "history": [
+    {
+      "timestamp": "2026-03-28T02:59:44.714Z",
+      "feature": "config",
+      "phase": "do",
+      "action": "updated"
+    }
+  ]
 }
