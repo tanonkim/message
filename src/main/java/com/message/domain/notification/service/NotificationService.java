@@ -12,8 +12,13 @@ import org.springframework.stereotype.Service;
 public class NotificationService {
 
     private final SaveNotificationService saveNotificationService;
+    private final DetailNotificationService detailNotificationService;
 
     public NotificationResponse request(NotificationRequest request) {
         return saveNotificationService.request(request);
+    }
+
+    public NotificationResponse getStatus(Long notificationId) {
+        return detailNotificationService.getStatus(notificationId);
     }
 }

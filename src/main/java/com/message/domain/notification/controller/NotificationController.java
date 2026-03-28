@@ -20,4 +20,9 @@ public class NotificationController {
     public NotificationResponse send(@RequestBody @Valid NotificationRequest notificationRequest) {
         return notificationService.request(notificationRequest);
     }
+
+    @GetMapping("/{id}")
+    public NotificationResponse getStatus(@PathVariable Long id) {
+        return notificationService.getStatus(id);
+    }
 }
