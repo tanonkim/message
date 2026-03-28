@@ -1,8 +1,11 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-03-28T02:59:44.714Z",
+  "lastUpdated": "2026-03-28T04:22:47.075Z",
   "activeFeatures": [
-    "config"
+    "config",
+    "request",
+    "repository",
+    "service"
   ],
   "primaryFeature": "config",
   "features": {
@@ -18,6 +21,45 @@
         "lastUpdated": "2026-03-28T02:59:44.714Z"
       },
       "lastFile": "/Users/tanonkim/Documents/study/flab/backend/message/src/main/java/com/message/global/config/JacksonConfig.java"
+    },
+    "request": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-28T03:28:30.959Z",
+        "lastUpdated": "2026-03-28T03:28:30.959Z"
+      },
+      "lastFile": "/Users/tanonkim/Documents/study/flab/backend/message/src/main/java/com/message/domain/notification/controller/request/NotificationRequest.java"
+    },
+    "repository": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-28T03:45:35.914Z",
+        "lastUpdated": "2026-03-28T03:45:35.914Z"
+      },
+      "lastFile": "/Users/tanonkim/Documents/study/flab/backend/message/src/main/java/com/message/domain/notification/repository/DetailNotificaionLog.java"
+    },
+    "service": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-28T04:22:28.586Z",
+        "lastUpdated": "2026-03-28T04:22:47.075Z"
+      },
+      "lastFile": "/Users/tanonkim/Documents/study/flab/backend/message/src/test/java/com/message/domain/notification/service/NotificationServiceTest.java"
     }
   },
   "pipeline": {
@@ -28,12 +70,36 @@
   "session": {
     "startedAt": "2026-03-26T06:09:31.729Z",
     "onboardingCompleted": false,
-    "lastActivity": "2026-03-28T02:59:44.714Z"
+    "lastActivity": "2026-03-28T04:22:47.075Z"
   },
   "history": [
     {
       "timestamp": "2026-03-28T02:59:44.714Z",
       "feature": "config",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-28T03:28:30.959Z",
+      "feature": "request",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-28T03:45:35.914Z",
+      "feature": "repository",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-28T04:22:28.586Z",
+      "feature": "service",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-28T04:22:47.075Z",
+      "feature": "service",
       "phase": "do",
       "action": "updated"
     }

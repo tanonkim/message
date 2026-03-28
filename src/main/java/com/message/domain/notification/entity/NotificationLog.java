@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 public class NotificationLog {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long notificationLogId;
 
     @Column(unique = true)
     private String idempotencyKey;
