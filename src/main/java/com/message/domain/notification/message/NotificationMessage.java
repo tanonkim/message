@@ -15,8 +15,19 @@ public record NotificationMessage(
         int retryCount
 ) {
 
-
     public String queueName() {
         return "noti." + priority.toLowerCase() + "." + channel.toLowerCase();
+    }
+
+    public NotificationMessage withIncrementedRetry() {
+        return new NotificationMessage(
+                notificationLogId, channel, priority, recipient,
+                templateCode, variables, content,
+                fallbackChannel, fallbackContent, retryCount + 1
+        );
+    }
+
+    public String dlqName() {
+        return "noti.dlq." + channel.toLowerCase();
     }
 }

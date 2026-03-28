@@ -85,10 +85,22 @@ public class NotificationLog {
         this.createAt = LocalDateTime.now();
     }
 
+    public void markSent(String providerMessageId, BigDecimal cost) {
+        this.status = NotificationStatus.SENT;
+        this.providerMessageId = providerMessageId;
+        this.cost = cost;
+        this.sentAt = LocalDateTime.now();
+    }
+
     public void markFailed(String errorMessage) {
         this.status = NotificationStatus.FAILED;
         this.errorMessage = errorMessage;
         this.retryCount++;
+    }
+
+    public void markFallback(String fallbackChannel) {
+        this.status = NotificationStatus.FALLBACK;
+        this.fallbackChannel = fallbackChannel;
     }
 
 }
