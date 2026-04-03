@@ -68,11 +68,11 @@ public class SesV2Sender implements NotificationSender {
 
     }
 
-    private String resolveBody(NotificationMessage message) {
+    private String resolveSubject(NotificationMessage message) {
         return message.templateCode() != null ? "[알림] " + message.templateCode() : "[알림]";
     }
 
-    private String resolveSubject(NotificationMessage message) {
+    private String resolveBody(NotificationMessage message) {
         return message.content() != null ? message.content() : "";
     }
 }
