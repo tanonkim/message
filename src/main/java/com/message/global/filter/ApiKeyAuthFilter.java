@@ -51,6 +51,8 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
     }
 
     private boolean isPublicPath(String path) {
-        return path.startsWith("/actuator");
+        return path.startsWith("/actuator")
+                || path.startsWith("/swagger-ui")
+                || path.startsWith("/v3/api-docs");
     }
 }
