@@ -1,6 +1,6 @@
 package com.message.domain.notification.converter;
 
-import com.message.domain.notification.enums.NotificationPriority;
+import com.message.domain.notification.enum_type.NotificationPriority;
 import com.message.global.converter.EnumAttributeConverter;
 import jakarta.persistence.Converter;
 

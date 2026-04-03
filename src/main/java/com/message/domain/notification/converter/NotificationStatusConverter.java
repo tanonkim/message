@@ -1,6 +1,6 @@
 package com.message.domain.notification.converter;
 
-import com.message.domain.notification.enums.NotificationStatus;
+import com.message.domain.notification.enum_type.NotificationStatus;
 import com.message.global.converter.EnumAttributeConverter;
 import jakarta.persistence.Converter;
 

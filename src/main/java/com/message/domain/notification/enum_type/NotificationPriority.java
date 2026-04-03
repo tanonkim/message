@@ -1,4 +1,4 @@
-package com.message.domain.notification.enums;
+package com.message.domain.notification.enum_type;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

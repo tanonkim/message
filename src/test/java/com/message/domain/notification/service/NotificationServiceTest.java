@@ -5,8 +5,8 @@ import com.message.domain.blocklist.service.BlockService;
 import com.message.domain.notification.controller.request.NotificationRequest;
 import com.message.domain.notification.controller.response.NotificationResponse;
 import com.message.domain.notification.entity.NotificationLog;
-import com.message.domain.notification.enums.NotificationChannel;
-import com.message.domain.notification.enums.NotificationStatus;
+import com.message.domain.notification.enum_type.NotificationChannel;
+import com.message.domain.notification.enum_type.NotificationStatus;
 import com.message.domain.notification.repository.DetailNotificaionLogRepository;
 import com.message.domain.notification.repository.NotificationLogRepository;
 import com.message.global.exception.ApiException;
@@ -104,8 +104,6 @@ class NotificationServiceTest {
         // given
         NotificationRequest request = createRequest("SMS", "HIGH", "01012345678", "dup-key");
         given(detailNotificaionLogRepository.existsByIdempotencyKey("dup-key")).willReturn(true);
-        given(detailNotificaionLogRepository.findByIdempotencyKey("dup-key"))
-                .willReturn(Optional.of(mock(NotificationLog.class)));
 
         // when & then
         assertThatThrownBy(() -> notificationService.request(request))

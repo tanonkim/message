@@ -1,7 +1,7 @@
 package com.message.domain.notification.sender;
 
 import com.message.domain.notification.entity.NotificationLog;
-import com.message.domain.notification.enums.NotificationPriority;
+import com.message.domain.notification.enum_type.NotificationPriority;
 import com.message.domain.notification.message.NotificationMessage;
 import com.message.domain.notification.repository.NotificationLogRepository;
 import com.message.global.metrics.NotificationMetrics;

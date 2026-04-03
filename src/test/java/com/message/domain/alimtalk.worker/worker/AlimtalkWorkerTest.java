@@ -41,7 +41,7 @@ class AlimtalkWorkerTest {
 
     @Test
     @DisplayName("알림톡 재시도 소진 + Fallback SMS 설정 시 SMS 큐로 재발행")
-    void processHigh_fallback_to_sms() {
+    void 알림톡_HIGH_재시도소진_Fallback_SMS큐로_재발행() {
         // HIGH maxRetry=3, retryCount=3 → 소진, fallback=SMS
         NotificationMessage message = new NotificationMessage(
                 1L, "ALIMTALK", "HIGH", "01012345678",
@@ -67,7 +67,7 @@ class AlimtalkWorkerTest {
 
     @Test
     @DisplayName("알림톡 재시도 소진 + Fallback 없으면 DLQ 적재")
-    void processHigh_no_fallback_to_dlq() {
+    void 알림톡_HIGH_재시도소진_Fallback없으면_DLQ_적재() {
         // HIGH maxRetry=3, retryCount=3 → 소진, fallback=null
         NotificationMessage message = new NotificationMessage(
                 2L, "ALIMTALK", "HIGH", "01099999999",
