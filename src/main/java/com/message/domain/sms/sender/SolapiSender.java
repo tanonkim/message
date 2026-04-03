@@ -28,8 +28,8 @@ public class SolapiSender implements NotificationSender {
 
     private static final String API_URL = "https://api.solapi.com/messages/v4/send";
     private final SolapiProperties solapiProperties;
-    private final RestClient restClient = RestClient.create();
     private final ObjectMapper objectMapper;
+    private final RestClient restClient;
 
     @Override
     public SendResult send(NotificationMessage message) {

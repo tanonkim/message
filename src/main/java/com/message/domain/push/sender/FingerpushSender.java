@@ -24,7 +24,7 @@ public class FingerpushSender implements NotificationSender {
 
     private final FingerpushProperties fingerpushProperties;
     private final ObjectMapper objectMapper;
-    private final RestClient restClient = RestClient.create();
+    private final RestClient restClient;
 
     @Override
     public SendResult send(NotificationMessage message) {
