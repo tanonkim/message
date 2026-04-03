@@ -1,9 +1,81 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-03-26T06:09:31.729Z",
-  "activeFeatures": [],
-  "primaryFeature": null,
-  "features": {},
+  "lastUpdated": "2026-03-28T06:21:12.084Z",
+  "activeFeatures": [
+    "config",
+    "request",
+    "repository",
+    "service",
+    "worker"
+  ],
+  "primaryFeature": "config",
+  "features": {
+    "config": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-28T02:59:44.714Z",
+        "lastUpdated": "2026-03-28T04:59:37.815Z"
+      },
+      "lastFile": "/Users/tanonkim/Documents/study/flab/backend/message/src/main/java/com/message/global/config/ActiveMqConfig.java"
+    },
+    "request": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-28T03:28:30.959Z",
+        "lastUpdated": "2026-03-28T03:28:30.959Z"
+      },
+      "lastFile": "/Users/tanonkim/Documents/study/flab/backend/message/src/main/java/com/message/domain/notification/controller/request/NotificationRequest.java"
+    },
+    "repository": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-28T03:45:35.914Z",
+        "lastUpdated": "2026-03-28T03:45:35.914Z"
+      },
+      "lastFile": "/Users/tanonkim/Documents/study/flab/backend/message/src/main/java/com/message/domain/notification/repository/DetailNotificaionLog.java"
+    },
+    "service": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-28T04:22:28.586Z",
+        "lastUpdated": "2026-03-28T04:40:58.397Z"
+      },
+      "lastFile": "/Users/tanonkim/Documents/study/flab/backend/message/src/test/java/com/message/domain/notification/service/NotificationServiceTest.java"
+    },
+    "worker": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-28T06:21:02.856Z",
+        "lastUpdated": "2026-03-28T06:21:12.084Z"
+      },
+      "lastFile": "/Users/tanonkim/Documents/study/flab/backend/message/src/main/java/com/message/domain/sms/worker/SmsWorker.java"
+    }
+  },
   "pipeline": {
     "currentPhase": 1,
     "level": "Dynamic",
@@ -12,7 +84,86 @@
   "session": {
     "startedAt": "2026-03-26T06:09:31.729Z",
     "onboardingCompleted": false,
-    "lastActivity": "2026-03-26T06:09:31.729Z"
+    "lastActivity": "2026-03-28T06:21:12.084Z"
   },
-  "history": []
+  "history": [
+    {
+      "timestamp": "2026-03-28T02:59:44.714Z",
+      "feature": "config",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-28T03:28:30.959Z",
+      "feature": "request",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-28T03:45:35.914Z",
+      "feature": "repository",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-28T04:22:28.586Z",
+      "feature": "service",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-28T04:22:47.075Z",
+      "feature": "service",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-28T04:37:28.769Z",
+      "feature": "service",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-28T04:37:50.897Z",
+      "feature": "service",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-28T04:40:20.268Z",
+      "feature": "service",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-28T04:40:58.397Z",
+      "feature": "service",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-28T04:59:04.444Z",
+      "feature": "config",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-28T04:59:37.815Z",
+      "feature": "config",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-28T06:21:02.856Z",
+      "feature": "worker",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-28T06:21:12.084Z",
+      "feature": "worker",
+      "phase": "do",
+      "action": "updated"
+    }
+  ]
 }
