@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +36,11 @@ public class FingerpushSender implements NotificationSender {
             if (recipient == null || recipient.isBlank()) {
                 return sendEntire(content);
             } else if (recipient.contains(",")) {
-                return sendTarget(List.of(recipient.split(",")), content);
+                List<String> tokens = Arrays.stream(recipient.split(","))
+                        .map(String::trim)
+                        .filter(s -> !s.isBlank())
+                        .toList();
+                return sendTarget(tokens, content);
             } else {
                 return sendSingle(recipient, content);
             }
@@ -57,21 +62,31 @@ public class FingerpushSender implements NotificationSender {
         return SendResult.success("single-" + deviceToken, 0);
     }
 
-    private SendResult sendTarget(List<String> tokens, String content) throws Exception {
+    private SendResult sendTarget(List<String> tokens, String content) {
         List<List<String>> batches = partition(tokens, BATCH_SIZE);
         String lastId = null;
+        int failCount = 0;
 
         for (List<String> batch : batches) {
-            Map<String, Object> body = Map.of(
-                    "app_id", fingerpushProperties.appId(),
-                    "device_tokens", batch,
-                    "message", content
-            );
-            lastId = postToFingerpush("/push/target", body);
+            try {
+                Map<String, Object> body = Map.of(
+                        "app_id", fingerpushProperties.appId(),
+                        "device_tokens", batch,
+                        "message", content
+                );
+                lastId = postToFingerpush("/push/target", body);
+            } catch (Exception e) {
+                log.error("Fingerpush batch failed: size={}, error={}", batch.size(), e.getMessage());
+                failCount += batch.size();
+            }
         }
 
-        log.info("Fingerpush TARGET sent: count={}", tokens.size());
-        return SendResult.success("target-" + lastId, 0);
+        log.info("Fingerpush TARGET: total={}, failed={}", tokens.size(), failCount);
+
+        if (failCount == tokens.size()) {
+            return SendResult.failure("전체 배치 발송 실패");
+        }
+        return SendResult.success("target-" + (lastId != null ? lastId : "unknown"), 0);
     }
 
     private SendResult sendEntire(String content) throws Exception {
