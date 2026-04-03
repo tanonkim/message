@@ -22,7 +22,7 @@ public record NotificationResponse(
 
     public static NotificationResponse from(NotificationLog log) {
         return new NotificationResponse(
-                log.getNotificationLogId(),
+                log.getId(),
                 log.getChannel().name(),
                 log.getStatus().name(),
                 log.getSentAt(),

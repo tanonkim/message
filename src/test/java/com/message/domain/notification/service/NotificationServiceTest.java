@@ -56,7 +56,7 @@ class NotificationServiceTest {
         // given
         NotificationRequest request = createRequest("SMS", "CRITICAL", "01012345678", null);
         NotificationLog savedLog = mock(NotificationLog.class);
-        given(savedLog.getNotificationLogId()).willReturn(1L);
+        given(savedLog.getId()).willReturn(1L);
         given(detailNotificaionLogRepository.existsByIdempotencyKey(any())).willReturn(false);
         given(notificationLogRepository.save(any())).willReturn(savedLog);
 
@@ -83,7 +83,7 @@ class NotificationServiceTest {
         // given
         NotificationRequest request = createRequest("SMS", "NORMAL", "01099999999", null);
         NotificationLog blockedLog = mock(NotificationLog.class);
-        given(blockedLog.getNotificationLogId()).willReturn(2L);
+        given(blockedLog.getId()).willReturn(2L);
         given(blockedLog.getChannel()).willReturn(NotificationChannel.SMS);
         given(blockedLog.getStatus()).willReturn(NotificationStatus.FAILED);
         given(detailNotificaionLogRepository.existsByIdempotencyKey(any())).willReturn(false);

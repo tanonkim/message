@@ -60,12 +60,12 @@ public class SaveNotificationService {
         NotificationLog log = saveLog(request, idempotencyKey);
 
         // JMS 큐 발행
-        NotificationMessage message = buildMessage(log.getNotificationLogId(), request, channel, priority);
+        NotificationMessage message = buildMessage(log.getId(), request, channel, priority);
         String queueName = message.queueName();
 
         jmsTemplate.convertAndSend(queueName, message);
 
-        return NotificationResponse.pending(log.getNotificationLogId());
+        return NotificationResponse.pending(log.getId());
     }
 
     private NotificationMessage buildMessage(Long logId, NotificationRequest request, NotificationChannel channel, NotificationPriority priority) {

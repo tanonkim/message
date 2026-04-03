@@ -1,17 +1,19 @@
 package com.message.domain.notification.enums;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 @Getter
-@RequiredArgsConstructor
+@AllArgsConstructor
 public enum NotificationPriority {
 
-    CRITICAL(5, 0L),
-    High(3, 60_000L),
-    NORMAL(3, 300_000L),   // 5분
-    LOW(1, 0L);
+    CRITICAL(5, 0L, "긴급"),       // 긴급
+    HIGH(3, 60_000L, "높음"),      // 높음
+    NORMAL(3, 300_000L, "보통"),   // 보통 (5분 딜레이)
+    LOW(1, 0L, "낮음")             // 낮음
+    ;
 
     private final int maxRetry;
     private final long retryDelayMs;
+    private final String desc;
 }
