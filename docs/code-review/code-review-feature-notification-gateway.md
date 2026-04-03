@@ -19,7 +19,7 @@
 
 ## CRITICAL
 
-### 1. `SesV2Sender` — Subject/Body 필드 역전 버그
+### 1. `SesV2Sender` — Subject/Body 필드 역전 버그 [완료 -> fix : Subject/Body 필드 역전 버그 수정]
 
 **위치**: `SesV2Sender.java:71-77`
 
@@ -34,7 +34,7 @@
 
 ---
 
-### 2. `NotificationLog` — 컨벤션 위반 (Entity 필수 요소 다수 누락)
+### 2. `NotificationLog` — 컨벤션 위반 (Entity 필수 요소 다수 누락) [완료 -> refactor : NotificationLog Entity 컨벤션 위반 수정]
 
 **위치**: `NotificationLog.java`
 
@@ -50,7 +50,7 @@
 
 ---
 
-### 3. `SaveNotificationService` — `@Transactional` 누락 + 이중 조회 비효율
+### 3. `SaveNotificationService` — `@Transactional` 누락 + 이중 조회 비효율 [완료 -> fix : @Transactional 누락 + 이중 조회 비효율 수정]
 
 **위치**: `SaveNotificationService.java:34-44`
 
@@ -90,7 +90,7 @@ if (detailNotificaionLogRepository.existsByIdempotencyKey(idempotencyKey)) {
 
 ## WARNING
 
-### 5. `AbstractWorker` — fallback 큐 이름 생성 로직 중복
+### 5. `AbstractWorker` — fallback 큐 이름 생성 로직 중복 [완료 -> fix : AbstractWorker fallback 큐 이름 생성 로직 중복 수정]
 
 **위치**: `AbstractWorker.java:69`
 
@@ -103,7 +103,7 @@ String fallbackQueue = "noti." + message.priority().toLowerCase() + "." + messag
 
 ---
 
-### 6. `SolapiSender`, `FingerpushSender` — `RestClient` 인스턴스 필드 선언
+### 6. `SolapiSender`, `FingerpushSender` — `RestClient` 인스턴스 필드 선언 [완료 -> fix : RestClient 인스턴스 필드 선언으로 수정]
 
 **위치**: `SolapiSender.java:31`, `FingerpushSender.java:28`
 
@@ -115,7 +115,7 @@ Spring Bean에 주입받지 않고 직접 생성하면 **테스트에서 Mock이
 
 ---
 
-### 7. `FingerpushSender` — 배치 발송 중 부분 실패 처리 없음
+### 7. `FingerpushSender` — 배치 발송 중 부분 실패 처리 없음 [완료 -> FingerpushSender — 배치 발송 중 부분 실패 처리 없음]
 
 **위치**: `FingerpushSender.java:61-74`
 
@@ -173,7 +173,7 @@ if (environment.acceptsProfiles(Profiles.of("stage")) && !stageEmailFilter.isAll
 
 ---
 
-### 10. `ActiveMqShutdownManager` — 대기 시간 하드코딩
+### 10. `ActiveMqShutdownManager` — 대기 시간 하드코딩 [완료]
 
 **위치**: `ActiveMqShutdownManager.java:24`
 
@@ -187,7 +187,7 @@ Thread.sleep(3000); // 처리 중인 메시지 완료 대기
 
 ## INFO
 
-### 11. `AlimtalkWorkerTest` — 테스트 메서드명 영어 (컨벤션 위반)
+### 11. `AlimtalkWorkerTest` — 테스트 메서드명 영어 (컨벤션 위반) [완료]
 
 **위치**: `AlimtalkWorkerTest.java:43, 69`
 
@@ -205,7 +205,7 @@ void 알림톡_HIGH_재시도소진_Fallback없으면_DLQ_적재()
 
 ---
 
-### 12. Enum 패키지 위치 불일치
+### 12. Enum 패키지 위치 불일치 [완료]
 
 **위치**: `domain/notification/enums/`
 
