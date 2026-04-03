@@ -17,6 +17,7 @@ public class NotificationMetrics {
     private final MeterRegistry meterRegistry;
     private final ConcurrentMap<String, Counter> sentCounters = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, Counter> failedCounters = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Counter> dlqCounters = new ConcurrentHashMap<>();
 
     public void recordSent(String channel) {
         sentCounters.computeIfAbsent(channel, ch ->
@@ -37,11 +38,12 @@ public class NotificationMetrics {
     }
 
     public void recordDlq(String channel) {
-        Counter.builder("notification.dlq")
-                .tag("channel", channel.toLowerCase())
-                .description("DLQ 적재 건수")
-                .register(meterRegistry)
-                .increment();
+        dlqCounters.computeIfAbsent(channel, ch ->
+                Counter.builder("notification.dlq")
+                        .tag("channel", ch.toLowerCase())
+                        .description("DLQ 적재 건수")
+                        .register(meterRegistry)
+        ).increment();
     }
 
 }
