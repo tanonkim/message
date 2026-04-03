@@ -66,12 +66,11 @@ public abstract class AbstractWorker {
 
     private void onMaxRetryExceeded(NotificationMessage message, NotificationLog notificationLog, String errorMessage) {
         if (message.fallbackChannel() != null) {
-            String fallbackQueue = "noti." + message.priority().toLowerCase() + "." + message.fallbackChannel().toLowerCase();
             NotificationMessage fallbackMessage = new NotificationMessage(
                     message.notificationLogId(), message.fallbackChannel(), message.priority(),
                     message.recipient(), null, null, message.fallbackContent(), null, null, 0
             );
-            jmsTemplate.convertAndSend(fallbackQueue, fallbackMessage);
+            jmsTemplate.convertAndSend(fallbackMessage.queueName(), fallbackMessage);
             notificationLog.markFallback(message.fallbackChannel());
             log.warn("Falling back to {}: logId={}", message.fallbackChannel(), message.notificationLogId());
         } else {
