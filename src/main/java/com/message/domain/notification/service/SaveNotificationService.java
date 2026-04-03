@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -31,33 +32,31 @@ public class SaveNotificationService {
     private final ObjectMapper objectMapper;
     private final JmsTemplate jmsTemplate;
 
+    @Transactional
     public NotificationResponse request(NotificationRequest request) {
         String idempotencyKey = resolveIdempotencyKey(request); // 중복 방지 키
 
         // 중복 요청 체크
         if (detailNotificaionLogRepository.existsByIdempotencyKey(idempotencyKey)) {
-            detailNotificaionLogRepository.findByIdempotencyKey(idempotencyKey)
-                    .orElseThrow(() -> new ApiException(ErrorCode.DUPLICATE_REQUEST));
-
             log.warn("Duplicate request detected: idempotencyKey={}", idempotencyKey);
             throw new ApiException(ErrorCode.DUPLICATE_REQUEST);
-        }
-
-        // 수신 차단 Pass
-        if (blockService.isBlocked(request)) {
-            log.warn("Blocked recipient: serviceId={}", request.serviceId());
-            NotificationLog blockedLog = saveLog(request, idempotencyKey);
-            blockedLog.markFailed("수신 차단된 대상입니다");
-            notificationLogRepository.save(blockedLog);
-            return NotificationResponse.from(blockedLog);
         }
 
         // 채널/우선순위 검증
         NotificationChannel channel = parseChannel(request.channel());
         NotificationPriority priority = parsePriority(request.priority());
 
+        // 수신 차단 Pass
+        if (blockService.isBlocked(request)) {
+            log.warn("Blocked recipient: serviceId={}", request.serviceId());
+            NotificationLog blockedLog = saveLog(request, idempotencyKey, channel, priority);
+            blockedLog.markFailed("수신 차단된 대상입니다");
+            notificationLogRepository.save(blockedLog);
+            return NotificationResponse.from(blockedLog);
+        }
+
         // 발송 이력 저장 (PENDING)
-        NotificationLog log = saveLog(request, idempotencyKey);
+        NotificationLog log = saveLog(request, idempotencyKey, channel, priority);
 
         // JMS 큐 발행
         NotificationMessage message = buildMessage(log.getId(), request, channel, priority);
@@ -83,7 +82,8 @@ public class SaveNotificationService {
         );
     }
 
-    private NotificationLog saveLog(NotificationRequest request, String idempotencyKey) {
+    private NotificationLog saveLog(NotificationRequest request, String idempotencyKey,
+                                    NotificationChannel channel, NotificationPriority priority) {
         String variables = null;
         if (request.template() != null && request.template().variables() != null) {
             try {
@@ -96,8 +96,8 @@ public class SaveNotificationService {
         NotificationLog notificationLog = NotificationLog.builder()
                 .idempotencyKey(idempotencyKey)
                 .serviceId(request.serviceId())
-                .channel(parseChannel(request.channel()))
-                .priority(parsePriority(request.priority()))
+                .channel(channel)
+                .priority(priority)
                 .recipient(request.recipient().primary())
                 .templateId(request.template() != null ? request.template().id() : null)
                 .variables(variables)
