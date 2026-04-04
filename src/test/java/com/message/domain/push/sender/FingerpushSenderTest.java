@@ -160,8 +160,8 @@ class FingerpushSenderTest {
     }
 
     @Test
-    @DisplayName("다중 수신자 전체 배치 실패 시 failure 반환")
-    void 다중_수신자_전체_배치_실패_failure_반환() {
+    @DisplayName("다중 수신자 전체 배치 실패 시 RuntimeException 발생 (Circuit Breaker가 실패로 집계)")
+    void 다중_수신자_전체_배치_실패_RuntimeException_발생() {
         givenRestClientChainSetup();
         given(responseSpec.body(String.class))
                 .willThrow(new RuntimeException("API 연결 실패"));
@@ -171,9 +171,8 @@ class FingerpushSenderTest {
                 null, null, "테스트 메시지", null, null, 0
         );
 
-        SendResult result = fingerpushSender.send(message);
-
-        assertThat(result.success()).isFalse();
-        assertThat(result.errorMessage()).isEqualTo("전체 배치 발송 실패");
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> fingerpushSender.send(message))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("전체 배치 발송 실패");
     }
 }

@@ -2,7 +2,6 @@ package com.message.domain.email.sender;
 
 import com.message.domain.notification.message.NotificationMessage;
 import com.message.domain.notification.sender.NotificationSender;
-import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,39 +40,32 @@ public class SesV2Sender implements NotificationSender {
             return SendResult.failure("Stage 환경에서 허용되지 않는 도메인입니다: " + toEmail);
         }
         
-        try {
-            SendEmailRequest request = SendEmailRequest.builder()
-                    .fromEmailAddress(sesProperties.fromEmail())
-                    .destination(Destination.builder().toAddresses(toEmail).build())
-                    .content(EmailContent.builder()
-                            .simple(Message.builder()
-                                    .subject(Content.builder().data(resolveSubject(message)).charset("UTF-8").build())
-                                    .body(Body.builder()
-                                            .text(Content.builder().data(resolveBody(message)).charset("UTF-8").build())
-                                            .build())
-                                    .build())
-                            .build())
-                    .build();
+        SendEmailRequest request = SendEmailRequest.builder()
+                .fromEmailAddress(sesProperties.fromEmail())
+                .destination(Destination.builder().toAddresses(toEmail).build())
+                .content(EmailContent.builder()
+                        .simple(Message.builder()
+                                .subject(Content.builder().data(resolveSubject(message)).charset("UTF-8").build())
+                                .body(Body.builder()
+                                        .text(Content.builder().data(resolveBody(message)).charset("UTF-8").build())
+                                        .build())
+                                .build())
+                        .build())
+                .build();
 
-            SendEmailResponse response = sesV2Client.sendEmail(request);
-            String messageId = response.messageId();
-            log.info("SES email sent: messageId={}, to={}", messageId, toEmail);
-            return SendResult.success(messageId, 0.1);
-            
-        }
-        catch (SesV2Exception e) {
-            log.error("SesV2Sender failed: to={}, code={}", toEmail, e.awsErrorDetails().errorCode(), e);
-            return SendResult.failure(e.awsErrorDetails().errorMessage());
-        } catch (Exception e) {
-            log.error("SesV2Sender unexpected error: to={}", toEmail, e);
-            return SendResult.failure(e.getMessage());
-        }
-
+        SendEmailResponse response = sesV2Client.sendEmail(request);
+        String messageId = response.messageId();
+        log.info("SES email sent: messageId={}, to={}", messageId, toEmail);
+        return SendResult.success(messageId, 0.1);
     }
 
-    SendResult fallback(NotificationMessage message, CallNotPermittedException e) {
-        log.warn("SES Circuit Breaker OPEN - SES 호출 차단됨: {}", e.getMessage());
-        return SendResult.failure("Circuit Breaker OPEN: 이메일 서비스 일시 중단");
+    private SendResult fallback(NotificationMessage message, Throwable e) {
+        if (e instanceof io.github.resilience4j.circuitbreaker.CallNotPermittedException) {
+            log.warn("이메일 Circuit Breaker OPEN - SES 호출 차단됨: {}", e.getMessage());
+            return SendResult.failure("Circuit Breaker OPEN: 이메일 서비스 일시 중단");
+        }
+        log.error("SesV2Sender failed: to={}", message.recipient(), e);
+        return SendResult.failure(e.getMessage());
     }
 
     private String resolveSubject(NotificationMessage message) {
