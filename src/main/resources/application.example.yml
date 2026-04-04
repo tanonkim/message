@@ -33,3 +33,28 @@ logging:
   level:
     com.message: DEBUG
     org.springframework.jms: INFO
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      solapi:                          # SMS용
+        slidingWindowSize: 10          # 최근 10번 호출 기준
+        failureRateThreshold: 50       # 50% 이상 실패 시 OPEN
+        waitDurationInOpenState: 60s   # OPEN 후 60초 대기
+        permittedNumberOfCallsInHalfOpenState: 3  # HALF-OPEN에서 3번 테스트
+        minimumNumberOfCalls: 5        # 최소 5번 호출 후 판단
+
+      nurigo:                          # 알림톡용
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 60s
+
+      ses:                             # 이메일용
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s   # AWS는 빠르게 복구되는 경우 많음
+
+      fingerpush:                      # 푸시용
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 60s

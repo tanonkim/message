@@ -2,6 +2,8 @@ package com.message.domain.email.sender;
 
 import com.message.domain.notification.message.NotificationMessage;
 import com.message.domain.notification.sender.NotificationSender;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -29,6 +31,7 @@ public class SesV2Sender implements NotificationSender {
     }
 
     @Override
+    @CircuitBreaker(name = "ses", fallbackMethod = "fallback")
     public SendResult send(NotificationMessage message) {
         String toEmail = message.recipient();
 
@@ -66,6 +69,11 @@ public class SesV2Sender implements NotificationSender {
             return SendResult.failure(e.getMessage());
         }
 
+    }
+
+    SendResult fallback(NotificationMessage message, CallNotPermittedException e) {
+        log.warn("SES Circuit Breaker OPEN - SES 호출 차단됨: {}", e.getMessage());
+        return SendResult.failure("Circuit Breaker OPEN: 이메일 서비스 일시 중단");
     }
 
     private String resolveSubject(NotificationMessage message) {

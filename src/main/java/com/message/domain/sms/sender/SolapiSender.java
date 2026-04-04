@@ -4,6 +4,8 @@ package com.message.domain.sms.sender;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.message.domain.notification.message.NotificationMessage;
 import com.message.domain.notification.sender.NotificationSender;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -32,6 +34,7 @@ public class SolapiSender implements NotificationSender {
     private final RestClient restClient;
 
     @Override
+    @CircuitBreaker(name = "solapi", fallbackMethod = "fallback")
     public SendResult send(NotificationMessage message) {
         try {
             String date = Instant.now().toString();
@@ -55,6 +58,11 @@ public class SolapiSender implements NotificationSender {
             log.error("SolapiSender failed: recipient={}", message.recipient(), e);
             return SendResult.failure(e.getMessage());
         }
+    }
+
+    SendResult fallback(NotificationMessage message, CallNotPermittedException e) {
+        log.warn("SMS Circuit Breaker OPEN - Solapi 호출 차단됨: {}", e.getMessage());
+        return SendResult.failure("Circuit Breaker OPEN: SMS 서비스 일시 중단");
     }
 
 

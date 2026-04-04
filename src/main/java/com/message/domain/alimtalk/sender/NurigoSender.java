@@ -2,6 +2,8 @@ package com.message.domain.alimtalk.sender;
 
 import com.message.domain.notification.message.NotificationMessage;
 import com.message.domain.notification.sender.NotificationSender;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.nurigo.sdk.NurigoApp;
@@ -32,6 +34,7 @@ public class NurigoSender implements NotificationSender {
     }
 
     @Override
+    @CircuitBreaker(name = "nurigo", fallbackMethod = "fallback")
     public SendResult send(NotificationMessage message) {
         try {
             Message kakaoMessage = new Message();
@@ -61,5 +64,10 @@ public class NurigoSender implements NotificationSender {
             log.error("NurigoSender failed: recipient={}", message.recipient(), e);
             return SendResult.failure(e.getMessage());
         }
+    }
+
+    SendResult fallback(NotificationMessage message, CallNotPermittedException e) {
+        log.warn("Nurigo Circuit Breaker OPEN - Nurigo 호출 차단됨: {}", e.getMessage());
+        return SendResult.failure("Circuit Breaker OPEN: Nurigo 서비스 일시 중단");
     }
 }

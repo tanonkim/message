@@ -3,6 +3,8 @@ package com.message.domain.push.sender;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.message.domain.notification.message.NotificationMessage;
 import com.message.domain.notification.sender.NotificationSender;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -28,6 +30,7 @@ public class FingerpushSender implements NotificationSender {
     private final RestClient restClient;
 
     @Override
+    @CircuitBreaker(name = "fingerpush", fallbackMethod = "fallback")
     public SendResult send(NotificationMessage message) {
         try {
             String recipient = message.recipient();
@@ -48,6 +51,11 @@ public class FingerpushSender implements NotificationSender {
             log.error("FingerpushSender failed", e);
             return SendResult.failure(e.getMessage());
         }
+    }
+
+    SendResult fallback(NotificationMessage message, CallNotPermittedException e) {
+        log.warn("FingerPush Circuit Breaker OPEN - FingerPush 호출 차단됨: {}", e.getMessage());
+        return SendResult.failure("Circuit Breaker OPEN: FingerPush 서비스 일시 중단");
     }
 
     private SendResult sendSingle(String deviceToken, String content) throws Exception {
