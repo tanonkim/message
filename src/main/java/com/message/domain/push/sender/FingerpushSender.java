@@ -3,6 +3,7 @@ package com.message.domain.push.sender;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.message.domain.notification.message.NotificationMessage;
 import com.message.domain.notification.sender.NotificationSender;
+import com.message.domain.push.command.PushSendCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -27,11 +28,21 @@ public class FingerpushSender implements NotificationSender {
     private final ObjectMapper objectMapper;
     private final RestClient restClient;
 
+    // notification 도메인 경계 어댑터 — NotificationMessage → PushSendCommand 변환
     @Override
     public SendResult send(NotificationMessage message) {
+        PushSendCommand command = new PushSendCommand(
+                message.recipient(),
+                message.content()
+        );
+        return doSend(command);
+    }
+
+    // 실제 발송 로직 — push 도메인의 Command만 사용 (테스트를 위해 package-private)
+    SendResult doSend(PushSendCommand command) {
         try {
-            String recipient = message.recipient();
-            String content = message.content() != null ? message.content() : "";
+            String recipient = command.recipient();
+            String content = command.content() != null ? command.content() : "";
 
             if (recipient == null || recipient.isBlank()) {
                 return sendEntire(content);
@@ -56,8 +67,7 @@ public class FingerpushSender implements NotificationSender {
                 "device_token", deviceToken,
                 "message", content
         );
-
-        String response = postToFingerpush("/push/single", body);
+        postToFingerpush("/push/single", body);
         log.info("Fingerpush SINGLE sent: device={}", deviceToken);
         return SendResult.success("single-" + deviceToken, 0);
     }
@@ -94,7 +104,6 @@ public class FingerpushSender implements NotificationSender {
                 "app_id", fingerpushProperties.appId(),
                 "message", content
         );
-
         String messageId = postToFingerpush("/push/entire", body);
         log.info("Fingerpush ENTIRE sent");
         return SendResult.success("entire-" + messageId, 0);
