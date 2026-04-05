@@ -1,6 +1,7 @@
 package com.message.domain.notification.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.message.domain.blocklist.query.BlockCheckQuery;
 import com.message.domain.blocklist.service.BlockService;
 import com.message.domain.notification.controller.request.NotificationRequest;
 import com.message.domain.notification.controller.response.NotificationResponse;
@@ -14,12 +15,12 @@ import com.message.global.exception.ErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jms.core.JmsTemplate;
-
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -49,6 +50,9 @@ class NotificationServiceTest {
 
     @Mock
     private ObjectMapper objectMapper;
+
+    @Captor
+    private ArgumentCaptor<BlockCheckQuery> blockCheckCaptor;
 
     @Test
     @DisplayName("정상 발송 요청 시 202 Accepted 반환")
@@ -125,5 +129,54 @@ class NotificationServiceTest {
                         .isEqualTo(ErrorCode.INVALID_CHANNEL));
     }
 
+    @Test
+    @DisplayName("phone만 있는 요청 시 blockService에 phone이 담긴 BlockCheckQuery가 전달된다")
+    void request_phoneOnly_passesCorrectBlockCheckQuery() {
+        // given
+        NotificationRequest request = new NotificationRequest(
+                "order-service", "SMS", "NORMAL",
+                new NotificationRequest.RecipientDto("01012345678", null),
+                null, "테스트 메시지", null, null, null
+        );
+        NotificationLog savedLog = mock(NotificationLog.class);
+        given(savedLog.getId()).willReturn(10L);
+        given(detailNotificaionLogRepository.existsByIdempotencyKey(any())).willReturn(false);
+        given(blockService.isBlocked(any())).willReturn(false);
+        given(notificationLogRepository.save(any())).willReturn(savedLog);
+
+        // when
+        notificationService.request(request);
+
+        // then
+        verify(blockService).isBlocked(blockCheckCaptor.capture());
+        BlockCheckQuery captured = blockCheckCaptor.getValue();
+        assertThat(captured.phone()).isEqualTo("01012345678");
+        assertThat(captured.email()).isNull();
+    }
+
+    @Test
+    @DisplayName("email만 있는 요청 시 blockService에 email이 담긴 BlockCheckQuery가 전달된다")
+    void request_emailOnly_passesCorrectBlockCheckQuery() {
+        // given
+        NotificationRequest request = new NotificationRequest(
+                "order-service", "EMAIL", "NORMAL",
+                new NotificationRequest.RecipientDto(null, "test@example.com"),
+                null, "테스트 메시지", null, null, null
+        );
+        NotificationLog savedLog = mock(NotificationLog.class);
+        given(savedLog.getId()).willReturn(11L);
+        given(detailNotificaionLogRepository.existsByIdempotencyKey(any())).willReturn(false);
+        given(blockService.isBlocked(any())).willReturn(false);
+        given(notificationLogRepository.save(any())).willReturn(savedLog);
+
+        // when
+        notificationService.request(request);
+
+        // then
+        verify(blockService).isBlocked(blockCheckCaptor.capture());
+        BlockCheckQuery captured = blockCheckCaptor.getValue();
+        assertThat(captured.phone()).isNull();
+        assertThat(captured.email()).isEqualTo("test@example.com");
+    }
 
 }

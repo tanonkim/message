@@ -2,6 +2,7 @@ package com.message.domain.notification.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.message.domain.blocklist.query.BlockCheckQuery;
 import com.message.domain.blocklist.service.BlockService;
 import com.message.domain.notification.controller.request.NotificationRequest;
 import com.message.domain.notification.controller.response.NotificationResponse;
@@ -46,8 +47,11 @@ public class SaveNotificationService {
         NotificationChannel channel = parseChannel(request.channel());
         NotificationPriority priority = parsePriority(request.priority());
 
+        NotificationRequest.RecipientDto recipient = request.recipient();
+        BlockCheckQuery blockCheckQuery = new BlockCheckQuery(recipient.phone(), recipient.email());
+
         // 수신 차단 Pass
-        if (blockService.isBlocked(request)) {
+        if (blockService.isBlocked(blockCheckQuery)) {
             log.warn("Blocked recipient: serviceId={}", request.serviceId());
             NotificationLog blockedLog = saveLog(request, idempotencyKey, channel, priority);
             blockedLog.markFailed("수신 차단된 대상입니다");
