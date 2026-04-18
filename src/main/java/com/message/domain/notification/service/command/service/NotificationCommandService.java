@@ -1,4 +1,4 @@
-package com.message.domain.notification.service;
+package com.message.domain.notification.service.command.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,6 +12,7 @@ import com.message.domain.notification.enum_type.NotificationPriority;
 import com.message.domain.notification.message.NotificationMessage;
 import com.message.domain.notification.repository.DetailNotificaionLogRepository;
 import com.message.domain.notification.repository.NotificationLogRepository;
+import com.message.domain.notification.service.command.usecase.NotificationCommandUseCase;
 import com.message.global.exception.ApiException;
 import com.message.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class SaveNotificationService {
+public class NotificationCommandService implements NotificationCommandUseCase {
 
     private final NotificationLogRepository notificationLogRepository;
     private final DetailNotificaionLogRepository detailNotificaionLogRepository;
