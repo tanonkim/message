@@ -3,6 +3,7 @@ package com.message.domain.alimtalk.sender;
 import com.message.domain.alimtalk.command.AlimtalkSendCommand;
 import com.message.domain.notification.message.NotificationMessage;
 import com.message.domain.notification.sender.NotificationSender;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.extern.slf4j.Slf4j;
 import net.nurigo.sdk.NurigoApp;
 import net.nurigo.sdk.message.model.KakaoOption;
@@ -33,6 +34,7 @@ public class NurigoSender implements NotificationSender {
 
     // notification 도메인 경계 어댑터 — NotificationMessage → AlimtalkSendCommand 변환
     @Override
+    @CircuitBreaker(name = "nurigo", fallbackMethod = "fallback")
     public SendResult send(NotificationMessage message) {
         AlimtalkSendCommand command = new AlimtalkSendCommand(
                 message.recipient(),
@@ -71,5 +73,14 @@ public class NurigoSender implements NotificationSender {
             log.error("NurigoSender failed: recipient={}", command.recipient(), e);
             return SendResult.failure(e.getMessage());
         }
+    }
+
+    private SendResult fallback(NotificationMessage message, Throwable e) {
+        if (e instanceof io.github.resilience4j.circuitbreaker.CallNotPermittedException) {
+            log.warn("알림톡 Circuit Breaker OPEN - Nurigo 호출 차단됨: {}", e.getMessage());
+            return SendResult.failure("Circuit Breaker OPEN: Nurigo 서비스 일시 중단");
+        }
+        log.error("NurigoSender failed: recipient={}", message.recipient(), e);
+        return SendResult.failure(e.getMessage());
     }
 }

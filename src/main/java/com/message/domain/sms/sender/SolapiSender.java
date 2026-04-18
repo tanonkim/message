@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.message.domain.notification.message.NotificationMessage;
 import com.message.domain.notification.sender.NotificationSender;
 import com.message.domain.sms.command.SmsSendCommand;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -33,6 +34,7 @@ public class SolapiSender implements NotificationSender {
 
     // notification 도메인 경계 어댑터 — NotificationMessage → SmsSendCommand 변환
     @Override
+    @CircuitBreaker(name = "solapi", fallbackMethod = "fallback")
     public SendResult send(NotificationMessage message) {
         SmsSendCommand command = new SmsSendCommand(
                 message.recipient(),
@@ -66,6 +68,15 @@ public class SolapiSender implements NotificationSender {
         }
     }
 
+    private SendResult fallback(NotificationMessage message, Throwable e) {
+        if (e instanceof io.github.resilience4j.circuitbreaker.CallNotPermittedException) {
+            log.warn("SMS Circuit Breaker OPEN - Solapi 호출 차단됨: {}", e.getMessage());
+            return SendResult.failure("Circuit Breaker OPEN: SMS 서비스 일시 중단");
+        }
+        log.error("SolapiSender failed: recipient={}", message.recipient(), e);
+        return SendResult.failure(e.getMessage());
+    }
+
     private Map<String, Object> buildRequestBody(SmsSendCommand command) {
         return Map.of("message", Map.of(
                 "to", command.recipient(),
@@ -74,11 +85,15 @@ public class SolapiSender implements NotificationSender {
         ));
     }
 
-    private String generateSignature(String date, String salt) throws NoSuchAlgorithmException, InvalidKeyException {
-        String data = date + salt;
-        Mac mac = Mac.getInstance("HmacSHA256");
-        mac.init(new SecretKeySpec(solapiProperties.apiSecret().getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
-        return HexFormat.of().formatHex(mac.doFinal(data.getBytes(StandardCharsets.UTF_8)));
+    private String generateSignature(String date, String salt) {
+        try {
+            String data = date + salt;
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(new SecretKeySpec(solapiProperties.apiSecret().getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+            return HexFormat.of().formatHex(mac.doFinal(data.getBytes(StandardCharsets.UTF_8)));
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            throw new RuntimeException("HMAC 서명 생성 실패", e);
+        }
     }
 
     @SuppressWarnings("unchecked")
