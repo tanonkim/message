@@ -10,6 +10,8 @@ import com.message.domain.notification.enum_type.NotificationChannel;
 import com.message.domain.notification.enum_type.NotificationStatus;
 import com.message.domain.notification.repository.DetailNotificaionLogRepository;
 import com.message.domain.notification.repository.NotificationLogRepository;
+import com.message.domain.notification.service.command.service.NotificationCommandService;
+import com.message.domain.notification.service.command.usecase.NotificationCommandUseCase;
 import com.message.global.exception.ApiException;
 import com.message.global.exception.ErrorCode;
 import org.junit.jupiter.api.DisplayName;
@@ -34,7 +36,7 @@ import static org.mockito.Mockito.*;
 class NotificationServiceTest {
 
     @InjectMocks
-    private SaveNotificationService notificationService;
+    private NotificationCommandService notificationCommandUseCase;
 
     @Mock
     private BlockService blockService;
@@ -65,7 +67,7 @@ class NotificationServiceTest {
         given(notificationLogRepository.save(any())).willReturn(savedLog);
 
         // when
-        NotificationResponse response = notificationService.request(request);
+        NotificationResponse response = notificationCommandUseCase.request(request);
 
         // then
         assertThat(response.notificationLogId()).isEqualTo(1L);
@@ -95,7 +97,7 @@ class NotificationServiceTest {
         given(notificationLogRepository.save(any())).willReturn(blockedLog);
 
         // when
-        NotificationResponse response = notificationService.request(request);
+        NotificationResponse response = notificationCommandUseCase.request(request);
 
         // then
         assertThat(response.notificationLogId()).isEqualTo(2L);
@@ -110,7 +112,7 @@ class NotificationServiceTest {
         given(detailNotificaionLogRepository.existsByIdempotencyKey("dup-key")).willReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> notificationService.request(request))
+        assertThatThrownBy(() -> notificationCommandUseCase.request(request))
                 .isInstanceOf(ApiException.class)
                 .satisfies(e -> assertThat(((ApiException) e).getErrorCode())
                         .isEqualTo(ErrorCode.DUPLICATE_REQUEST));
@@ -123,7 +125,7 @@ class NotificationServiceTest {
     void request_invalidChannel() {
         NotificationRequest request = createRequest("KAKAO", "HIGH", "01012345678", null);
 
-        assertThatThrownBy(() -> notificationService.request(request))
+        assertThatThrownBy(() -> notificationCommandUseCase.request(request))
                 .isInstanceOf(ApiException.class)
                 .satisfies(e -> assertThat(((ApiException) e).getErrorCode())
                         .isEqualTo(ErrorCode.INVALID_CHANNEL));
@@ -145,7 +147,7 @@ class NotificationServiceTest {
         given(notificationLogRepository.save(any())).willReturn(savedLog);
 
         // when
-        notificationService.request(request);
+        notificationCommandUseCase.request(request);
 
         // then
         verify(blockService).isBlocked(blockCheckCaptor.capture());
@@ -170,7 +172,7 @@ class NotificationServiceTest {
         given(notificationLogRepository.save(any())).willReturn(savedLog);
 
         // when
-        notificationService.request(request);
+        notificationCommandUseCase.request(request);
 
         // then
         verify(blockService).isBlocked(blockCheckCaptor.capture());
