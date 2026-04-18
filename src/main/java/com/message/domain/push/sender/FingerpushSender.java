@@ -3,6 +3,7 @@ package com.message.domain.push.sender;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.message.domain.notification.message.NotificationMessage;
 import com.message.domain.notification.sender.NotificationSender;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -28,29 +29,34 @@ public class FingerpushSender implements NotificationSender {
     private final RestClient restClient;
 
     @Override
+    @CircuitBreaker(name = "fingerpush", fallbackMethod = "fallback")
     public SendResult send(NotificationMessage message) {
-        try {
-            String recipient = message.recipient();
-            String content = message.content() != null ? message.content() : "";
+        String recipient = message.recipient();
+        String content = message.content() != null ? message.content() : "";
 
-            if (recipient == null || recipient.isBlank()) {
-                return sendEntire(content);
-            } else if (recipient.contains(",")) {
-                List<String> tokens = Arrays.stream(recipient.split(","))
-                        .map(String::trim)
-                        .filter(s -> !s.isBlank())
-                        .toList();
-                return sendTarget(tokens, content);
-            } else {
-                return sendSingle(recipient, content);
-            }
-        } catch (Exception e) {
-            log.error("FingerpushSender failed", e);
-            return SendResult.failure(e.getMessage());
+        if (recipient == null || recipient.isBlank()) {
+            return sendEntire(content);
+        } else if (recipient.contains(",")) {
+            List<String> tokens = Arrays.stream(recipient.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isBlank())
+                    .toList();
+            return sendTarget(tokens, content);
+        } else {
+            return sendSingle(recipient, content);
         }
     }
 
-    private SendResult sendSingle(String deviceToken, String content) throws Exception {
+    private SendResult fallback(NotificationMessage message, Throwable e) {
+        if (e instanceof io.github.resilience4j.circuitbreaker.CallNotPermittedException) {
+            log.warn("푸시 Circuit Breaker OPEN - Fingerpush 호출 차단됨: {}", e.getMessage());
+            return SendResult.failure("Circuit Breaker OPEN: FingerPush 서비스 일시 중단");
+        }
+        log.error("FingerpushSender failed: recipient={}", message.recipient(), e);
+        return SendResult.failure(e.getMessage());
+    }
+
+    private SendResult sendSingle(String deviceToken, String content) {
         Map<String, Object> body = Map.of(
                 "app_id", fingerpushProperties.appId(),
                 "device_token", deviceToken,
@@ -84,12 +90,12 @@ public class FingerpushSender implements NotificationSender {
         log.info("Fingerpush TARGET: total={}, failed={}", tokens.size(), failCount);
 
         if (failCount == tokens.size()) {
-            return SendResult.failure("전체 배치 발송 실패");
+            throw new RuntimeException("Fingerpush 전체 배치 발송 실패");
         }
         return SendResult.success("target-" + (lastId != null ? lastId : "unknown"), 0);
     }
 
-    private SendResult sendEntire(String content) throws Exception {
+    private SendResult sendEntire(String content) {
         Map<String, Object> body = Map.of(
                 "app_id", fingerpushProperties.appId(),
                 "message", content
@@ -100,15 +106,18 @@ public class FingerpushSender implements NotificationSender {
         return SendResult.success("entire-" + messageId, 0);
     }
 
-    private String postToFingerpush(String path, Map<String, Object> body) throws Exception {
-        String response = restClient.post()
-                .uri(API_BASE_URL + path)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + fingerpushProperties.apiKey())
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(objectMapper.writeValueAsString(body))
-                .retrieve()
-                .body(String.class);
-        return response;
+    private String postToFingerpush(String path, Map<String, Object> body) {
+        try {
+            return restClient.post()
+                    .uri(API_BASE_URL + path)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + fingerpushProperties.apiKey())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(objectMapper.writeValueAsString(body))
+                    .retrieve()
+                    .body(String.class);
+        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+            throw new RuntimeException("Fingerpush 요청 직렬화 실패", e);
+        }
     }
 
     private <T> List<List<T>> partition(List<T> list, int size) {
