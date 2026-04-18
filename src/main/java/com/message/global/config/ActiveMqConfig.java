@@ -2,11 +2,11 @@ package com.message.global.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import jakarta.jms.ConnectionFactory;
 import jakarta.jms.Message;
 import jakarta.jms.Session;
 import jakarta.jms.TextMessage;
-import org.apache.activemq.ActiveMQConnectionFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.activemq.autoconfigure.ActiveMQConnectionFactoryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.annotation.EnableJms;
@@ -19,20 +19,9 @@ import org.springframework.jms.support.converter.MessageConverter;
 @Configuration
 public class ActiveMqConfig {
 
-    @Value("${spring.activemq.broker-url}")
-    private String brokerUrl;
-
-    @Value("${spring.activemq.user}")
-    private String user;
-
-    @Value("${spring.activemq.password}")
-    private String password;
-
     @Bean
-    public ActiveMQConnectionFactory connectionFactory() {
-        ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(user, password, brokerUrl);
-        factory.setTrustAllPackages(true);
-        return factory;
+    public ActiveMQConnectionFactoryCustomizer activeMQConnectionFactoryCustomizer() {
+        return factory -> factory.setTrustAllPackages(true);
     }
 
     @Bean
@@ -70,16 +59,16 @@ public class ActiveMqConfig {
     }
 
     @Bean
-    public JmsTemplate jmsTemplate(MessageConverter jacksonJmsMessageConverter) {
-        JmsTemplate template = new JmsTemplate(connectionFactory());
+    public JmsTemplate jmsTemplate(ConnectionFactory connectionFactory, MessageConverter jacksonJmsMessageConverter) {
+        JmsTemplate template = new JmsTemplate(connectionFactory);
         template.setMessageConverter(jacksonJmsMessageConverter);
         return template;
     }
 
     @Bean
-    public DefaultJmsListenerContainerFactory jmsListenerContainerFactory(MessageConverter jacksonJmsMessageConverter) {
+    public DefaultJmsListenerContainerFactory jmsListenerContainerFactory(ConnectionFactory connectionFactory, MessageConverter jacksonJmsMessageConverter) {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-        factory.setConnectionFactory(connectionFactory());
+        factory.setConnectionFactory(connectionFactory);
         factory.setMessageConverter(jacksonJmsMessageConverter);
         factory.setConcurrency("1-5");
         factory.setSessionTransacted(true);
