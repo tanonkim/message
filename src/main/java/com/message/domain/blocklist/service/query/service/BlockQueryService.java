@@ -1,7 +1,8 @@
-package com.message.domain.blocklist.service;
+package com.message.domain.blocklist.service.query.service;
 
 import com.message.domain.blocklist.query.BlockCheckQuery;
 import com.message.domain.blocklist.repository.BlocklistRepository;
+import com.message.domain.blocklist.service.query.usecase.BlockQueryUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class DetailBlockService {
+public class BlockQueryService implements BlockQueryUseCase {
 
     private final BlocklistRepository blocklistRepository;
 
