@@ -2,18 +2,21 @@ package com.message.domain.email.worker;
 
 import com.message.domain.email.sender.SesV2Sender;
 import com.message.domain.notification.message.NotificationMessage;
-import com.message.domain.notification.repository.NotificationLogRepository;
 import com.message.domain.notification.sender.AbstractWorker;
-import com.message.global.metrics.NotificationMetrics;
+import com.message.domain.notification.service.NotificationLogCommandService;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.stereotype.Component;
 
+@Component
 public class EmailWorker extends AbstractWorker {
 
     private final SesV2Sender sesV2Sender;
 
-    public EmailWorker(JmsTemplate jmsTemplate, NotificationLogRepository notificationLogRepository, NotificationMetrics notificationMetrics, SesV2Sender sesV2Sender) {
-        super(jmsTemplate, notificationLogRepository, notificationMetrics);
+    public EmailWorker(JmsTemplate jmsTemplate,
+                       NotificationLogCommandService notificationLogCommandService,
+                       SesV2Sender sesV2Sender) {
+        super(jmsTemplate, notificationLogCommandService);
         this.sesV2Sender = sesV2Sender;
     }
 

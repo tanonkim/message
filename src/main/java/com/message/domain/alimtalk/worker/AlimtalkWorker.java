@@ -2,9 +2,8 @@ package com.message.domain.alimtalk.worker;
 
 import com.message.domain.alimtalk.sender.NurigoSender;
 import com.message.domain.notification.message.NotificationMessage;
-import com.message.domain.notification.repository.NotificationLogRepository;
 import com.message.domain.notification.sender.AbstractWorker;
-import com.message.global.metrics.NotificationMetrics;
+import com.message.domain.notification.service.NotificationLogCommandService;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
@@ -14,8 +13,10 @@ public class AlimtalkWorker extends AbstractWorker {
 
     private final NurigoSender nurigoSender;
 
-    public AlimtalkWorker(JmsTemplate jmsTemplate, NotificationLogRepository notificationLogRepository, NotificationMetrics notificationMetrics, NurigoSender nurigoSender) {
-        super(jmsTemplate, notificationLogRepository, notificationMetrics);
+    public AlimtalkWorker(JmsTemplate jmsTemplate,
+                          NotificationLogCommandService notificationLogCommandService,
+                          NurigoSender nurigoSender) {
+        super(jmsTemplate, notificationLogCommandService);
         this.nurigoSender = nurigoSender;
     }
 

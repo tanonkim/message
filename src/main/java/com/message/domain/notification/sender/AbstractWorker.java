@@ -1,15 +1,12 @@
 package com.message.domain.notification.sender;
 
-import com.message.domain.notification.entity.NotificationLog;
 import com.message.domain.notification.enum_type.NotificationPriority;
 import com.message.domain.notification.message.NotificationMessage;
-import com.message.domain.notification.repository.NotificationLogRepository;
-import com.message.global.metrics.NotificationMetrics;
+import com.message.domain.notification.service.NotificationLogCommandService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.ScheduledMessage;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
@@ -19,26 +16,24 @@ import java.math.BigDecimal;
 public abstract class AbstractWorker {
 
     protected final JmsTemplate jmsTemplate;
-    protected final NotificationLogRepository notificationLogRepository;
-    protected final NotificationMetrics notificationMetrics;
+    protected final NotificationLogCommandService notificationLogCommandService;
 
-    @Transactional
     protected void process(NotificationMessage message, NotificationSender sender) {
-
         NotificationSender.SendResult result = sender.send(message);
 
-        NotificationLog notificationLog = notificationLogRepository.findById(message.notificationLogId())
-                .orElseThrow(() -> new IllegalStateException("NotificationLog not found: " + message.notificationLogId()));
-
         if (result.success()) {
-            notificationLog.markSent(result.providerMessageId(), BigDecimal.valueOf(result.cost()));
-            notificationMetrics.recordSent(message.channel());
+            notificationLogCommandService.markSent(
+                    message.notificationLogId(),
+                    result.providerMessageId(),
+                    BigDecimal.valueOf(result.cost()),
+                    message.channel()
+            );
         } else {
-            handleFailure(message, notificationLog, result.errorMessage());
+            handleFailure(message, result.errorMessage());
         }
     }
 
-    private void handleFailure(NotificationMessage message, NotificationLog notificationLog, String errorMessage) {
+    private void handleFailure(NotificationMessage message, String errorMessage) {
         NotificationPriority priority = NotificationPriority.valueOf(message.priority());
         int maxRetry = priority.getMaxRetry();
 
@@ -60,24 +55,22 @@ public abstract class AbstractWorker {
                         message.retryCount() + 1, maxRetry, message.notificationLogId(), errorMessage);
             }
         } else {
-            onMaxRetryExceeded(message, notificationLog, errorMessage);
+            onMaxRetryExceeded(message, errorMessage);
         }
     }
 
-    private void onMaxRetryExceeded(NotificationMessage message, NotificationLog notificationLog, String errorMessage) {
+    private void onMaxRetryExceeded(NotificationMessage message, String errorMessage) {
         if (message.fallbackChannel() != null) {
             NotificationMessage fallbackMessage = new NotificationMessage(
                     message.notificationLogId(), message.fallbackChannel(), message.priority(),
                     message.recipient(), null, null, message.fallbackContent(), null, null, 0
             );
             jmsTemplate.convertAndSend(fallbackMessage.queueName(), fallbackMessage);
-            notificationLog.markFallback(message.fallbackChannel());
+            notificationLogCommandService.markFallback(message.notificationLogId(), message.fallbackChannel());
             log.warn("Falling back to {}: logId={}", message.fallbackChannel(), message.notificationLogId());
         } else {
             jmsTemplate.convertAndSend(message.dlqName(), message);
-            notificationLog.markFailed(errorMessage);
-            notificationMetrics.recordFailed(message.channel());
-            notificationMetrics.recordDlq(message.channel());
+            notificationLogCommandService.markFailed(message.notificationLogId(), errorMessage, message.channel());
             log.error("Max retry exceeded, moved to DLQ: logId={}, dlq={}", message.notificationLogId(), message.dlqName());
         }
     }
