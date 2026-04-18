@@ -2,6 +2,7 @@ package com.message.domain.blocklist.service;
 
 import com.message.domain.blocklist.query.BlockCheckQuery;
 import com.message.domain.blocklist.repository.BlocklistRepository;
+import com.message.domain.blocklist.service.query.service.DetailBlockService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

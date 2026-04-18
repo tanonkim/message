@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-04-18T05:20:15.964Z",
+  "lastUpdated": "2026-04-18T07:04:25.799Z",
   "activeFeatures": [
     "config",
     "request",
@@ -67,7 +67,7 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-28T04:22:28.586Z",
-        "lastUpdated": "2026-04-03T07:37:05.044Z"
+        "lastUpdated": "2026-04-18T07:04:25.799Z"
       },
       "lastFile": "/Users/tanonkim/Documents/study/flab/backend/message/src/test/java/com/message/domain/notification/service/NotificationServiceTest.java"
     },
@@ -184,7 +184,7 @@
       "documents": {},
       "timestamps": {
         "started": "2026-04-03T07:48:50.920Z",
-        "lastUpdated": "2026-04-03T07:48:50.920Z"
+        "lastUpdated": "2026-04-18T06:49:08.112Z"
       },
       "lastFile": "/Users/tanonkim/Documents/study/flab/backend/message/src/main/java/com/message/domain/notification/controller/NotificationController.java"
     },
@@ -210,7 +210,7 @@
   "session": {
     "startedAt": "2026-03-26T06:09:31.729Z",
     "onboardingCompleted": false,
-    "lastActivity": "2026-04-18T05:20:15.964Z"
+    "lastActivity": "2026-04-18T07:04:25.799Z"
   },
   "history": [
     {
@@ -564,6 +564,54 @@
     {
       "timestamp": "2026-04-18T05:20:15.964Z",
       "feature": "sender",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-18T06:48:41.301Z",
+      "feature": "controller",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-18T06:48:54.531Z",
+      "feature": "controller",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-18T06:49:08.112Z",
+      "feature": "controller",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-18T06:54:00.604Z",
+      "feature": "service",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-18T06:54:16.281Z",
+      "feature": "service",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-18T07:04:08.507Z",
+      "feature": "service",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-18T07:04:16.775Z",
+      "feature": "service",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-18T07:04:25.799Z",
+      "feature": "service",
       "phase": "do",
       "action": "updated"
     }
