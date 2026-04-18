@@ -1,9 +1,9 @@
-package com.message.domain.notification.service;
+package com.message.domain.notification.service.command.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.message.domain.blocklist.query.BlockCheckQuery;
-import com.message.domain.blocklist.service.BlockService;
+import com.message.domain.blocklist.service.query.usecase.BlockQueryUseCase;
 import com.message.domain.notification.controller.request.NotificationRequest;
 import com.message.domain.notification.controller.response.NotificationResponse;
 import com.message.domain.notification.entity.NotificationLog;
@@ -12,6 +12,7 @@ import com.message.domain.notification.enum_type.NotificationPriority;
 import com.message.domain.notification.message.NotificationMessage;
 import com.message.domain.notification.repository.DetailNotificaionLogRepository;
 import com.message.domain.notification.repository.NotificationLogRepository;
+import com.message.domain.notification.service.command.usecase.NotificationCommandUseCase;
 import com.message.global.exception.ApiException;
 import com.message.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -25,11 +26,11 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class SaveNotificationService {
+public class NotificationCommandService implements NotificationCommandUseCase {
 
     private final NotificationLogRepository notificationLogRepository;
     private final DetailNotificaionLogRepository detailNotificaionLogRepository;
-    private final BlockService blockService;
+    private final BlockQueryUseCase blockQueryUseCase;
     private final ObjectMapper objectMapper;
     private final JmsTemplate jmsTemplate;
 
@@ -51,7 +52,7 @@ public class SaveNotificationService {
         BlockCheckQuery blockCheckQuery = new BlockCheckQuery(recipient.phone(), recipient.email());
 
         // 수신 차단 Pass
-        if (blockService.isBlocked(blockCheckQuery)) {
+        if (blockQueryUseCase.isBlocked(blockCheckQuery)) {
             log.warn("Blocked recipient: serviceId={}", request.serviceId());
             NotificationLog blockedLog = saveLog(request, idempotencyKey, channel, priority);
             blockedLog.markFailed("수신 차단된 대상입니다");

@@ -2,7 +2,7 @@ package com.message.domain.notification.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.message.domain.blocklist.query.BlockCheckQuery;
-import com.message.domain.blocklist.service.BlockService;
+import com.message.domain.blocklist.service.query.usecase.BlockQueryUseCase;
 import com.message.domain.notification.controller.request.NotificationRequest;
 import com.message.domain.notification.controller.response.NotificationResponse;
 import com.message.domain.notification.entity.NotificationLog;
@@ -10,6 +10,7 @@ import com.message.domain.notification.enum_type.NotificationChannel;
 import com.message.domain.notification.enum_type.NotificationStatus;
 import com.message.domain.notification.repository.DetailNotificaionLogRepository;
 import com.message.domain.notification.repository.NotificationLogRepository;
+import com.message.domain.notification.service.command.service.NotificationCommandService;
 import com.message.global.exception.ApiException;
 import com.message.global.exception.ErrorCode;
 import org.junit.jupiter.api.DisplayName;
@@ -34,10 +35,10 @@ import static org.mockito.Mockito.*;
 class NotificationServiceTest {
 
     @InjectMocks
-    private SaveNotificationService notificationService;
+    private NotificationCommandService notificationCommandUseCase;
 
     @Mock
-    private BlockService blockService;
+    private BlockQueryUseCase blockQueryUseCase;
 
     @Mock
     private NotificationLogRepository notificationLogRepository;
@@ -65,7 +66,7 @@ class NotificationServiceTest {
         given(notificationLogRepository.save(any())).willReturn(savedLog);
 
         // when
-        NotificationResponse response = notificationService.request(request);
+        NotificationResponse response = notificationCommandUseCase.request(request);
 
         // then
         assertThat(response.notificationLogId()).isEqualTo(1L);
@@ -91,11 +92,11 @@ class NotificationServiceTest {
         given(blockedLog.getChannel()).willReturn(NotificationChannel.SMS);
         given(blockedLog.getStatus()).willReturn(NotificationStatus.FAILED);
         given(detailNotificaionLogRepository.existsByIdempotencyKey(any())).willReturn(false);
-        given(blockService.isBlocked(any())).willReturn(true);
+        given(blockQueryUseCase.isBlocked(any())).willReturn(true);
         given(notificationLogRepository.save(any())).willReturn(blockedLog);
 
         // when
-        NotificationResponse response = notificationService.request(request);
+        NotificationResponse response = notificationCommandUseCase.request(request);
 
         // then
         assertThat(response.notificationLogId()).isEqualTo(2L);
@@ -110,7 +111,7 @@ class NotificationServiceTest {
         given(detailNotificaionLogRepository.existsByIdempotencyKey("dup-key")).willReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> notificationService.request(request))
+        assertThatThrownBy(() -> notificationCommandUseCase.request(request))
                 .isInstanceOf(ApiException.class)
                 .satisfies(e -> assertThat(((ApiException) e).getErrorCode())
                         .isEqualTo(ErrorCode.DUPLICATE_REQUEST));
@@ -123,14 +124,14 @@ class NotificationServiceTest {
     void request_invalidChannel() {
         NotificationRequest request = createRequest("KAKAO", "HIGH", "01012345678", null);
 
-        assertThatThrownBy(() -> notificationService.request(request))
+        assertThatThrownBy(() -> notificationCommandUseCase.request(request))
                 .isInstanceOf(ApiException.class)
                 .satisfies(e -> assertThat(((ApiException) e).getErrorCode())
                         .isEqualTo(ErrorCode.INVALID_CHANNEL));
     }
 
     @Test
-    @DisplayName("phone만 있는 요청 시 blockService에 phone이 담긴 BlockCheckQuery가 전달된다")
+    @DisplayName("phone만 있는 요청 시 blockQueryUseCase에 phone이 담긴 BlockCheckQuery가 전달된다")
     void request_phoneOnly_passesCorrectBlockCheckQuery() {
         // given
         NotificationRequest request = new NotificationRequest(
@@ -141,21 +142,21 @@ class NotificationServiceTest {
         NotificationLog savedLog = mock(NotificationLog.class);
         given(savedLog.getId()).willReturn(10L);
         given(detailNotificaionLogRepository.existsByIdempotencyKey(any())).willReturn(false);
-        given(blockService.isBlocked(any())).willReturn(false);
+        given(blockQueryUseCase.isBlocked(any())).willReturn(false);
         given(notificationLogRepository.save(any())).willReturn(savedLog);
 
         // when
-        notificationService.request(request);
+        notificationCommandUseCase.request(request);
 
         // then
-        verify(blockService).isBlocked(blockCheckCaptor.capture());
+        verify(blockQueryUseCase).isBlocked(blockCheckCaptor.capture());
         BlockCheckQuery captured = blockCheckCaptor.getValue();
         assertThat(captured.phone()).isEqualTo("01012345678");
         assertThat(captured.email()).isNull();
     }
 
     @Test
-    @DisplayName("email만 있는 요청 시 blockService에 email이 담긴 BlockCheckQuery가 전달된다")
+    @DisplayName("email만 있는 요청 시 blockQueryUseCase에 email이 담긴 BlockCheckQuery가 전달된다")
     void request_emailOnly_passesCorrectBlockCheckQuery() {
         // given
         NotificationRequest request = new NotificationRequest(
@@ -166,14 +167,14 @@ class NotificationServiceTest {
         NotificationLog savedLog = mock(NotificationLog.class);
         given(savedLog.getId()).willReturn(11L);
         given(detailNotificaionLogRepository.existsByIdempotencyKey(any())).willReturn(false);
-        given(blockService.isBlocked(any())).willReturn(false);
+        given(blockQueryUseCase.isBlocked(any())).willReturn(false);
         given(notificationLogRepository.save(any())).willReturn(savedLog);
 
         // when
-        notificationService.request(request);
+        notificationCommandUseCase.request(request);
 
         // then
-        verify(blockService).isBlocked(blockCheckCaptor.capture());
+        verify(blockQueryUseCase).isBlocked(blockCheckCaptor.capture());
         BlockCheckQuery captured = blockCheckCaptor.getValue();
         assertThat(captured.phone()).isNull();
         assertThat(captured.email()).isEqualTo("test@example.com");

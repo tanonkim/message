@@ -2,7 +2,8 @@ package com.message.domain.notification.controller;
 
 import com.message.domain.notification.controller.request.NotificationRequest;
 import com.message.domain.notification.controller.response.NotificationResponse;
-import com.message.domain.notification.service.NotificationService;
+import com.message.domain.notification.service.command.usecase.NotificationCommandUseCase;
+import com.message.domain.notification.service.query.usecase.NotificationQueryUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -19,7 +20,8 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class NotificationController {
 
-    private final NotificationService notificationService;
+    private final NotificationCommandUseCase notificationCommandUseCase;
+    private final NotificationQueryUseCase notificationQueryUseCase;
 
     @Operation(summary = "알림 발송 요청", description = "SMS, 카카오 알림톡, 이메일, 푸시 알림 발송을 요청합니다.")
     @ApiResponses({
@@ -30,7 +32,7 @@ public class NotificationController {
     @PostMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
     public NotificationResponse send(@RequestBody @Valid NotificationRequest notificationRequest) {
-        return notificationService.request(notificationRequest);
+        return notificationCommandUseCase.request(notificationRequest);
     }
 
     @Operation(summary = "알림 발송 상태 조회", description = "알림 로그 ID로 발송 상태를 조회합니다.")
@@ -41,6 +43,6 @@ public class NotificationController {
     @GetMapping("/{id}")
     public NotificationResponse getStatus(
             @Parameter(description = "알림 로그 ID", required = true) @PathVariable Long id) {
-        return notificationService.getStatus(id);
+        return notificationQueryUseCase.getStatus(id);
     }
 }

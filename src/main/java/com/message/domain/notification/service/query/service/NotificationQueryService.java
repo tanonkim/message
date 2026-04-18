@@ -1,9 +1,10 @@
-package com.message.domain.notification.service;
+package com.message.domain.notification.service.query.service;
 
 
 import com.message.domain.notification.controller.response.NotificationResponse;
 import com.message.domain.notification.entity.NotificationLog;
 import com.message.domain.notification.repository.NotificationLogRepository;
+import com.message.domain.notification.service.query.usecase.NotificationQueryUseCase;
 import com.message.global.exception.ApiException;
 import com.message.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class DetailNotificationService {
+public class NotificationQueryService implements NotificationQueryUseCase {
 
     private final NotificationLogRepository notificationLogRepository;
 
