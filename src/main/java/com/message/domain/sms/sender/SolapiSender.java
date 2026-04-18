@@ -1,9 +1,9 @@
 package com.message.domain.sms.sender;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.message.domain.notification.message.NotificationMessage;
 import com.message.domain.notification.sender.NotificationSender;
+import com.message.domain.sms.command.SmsSendCommand;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,17 +32,27 @@ public class SolapiSender implements NotificationSender {
     private final ObjectMapper objectMapper;
     private final RestClient restClient;
 
+    // notification 도메인 경계 어댑터 — NotificationMessage → SmsSendCommand 변환
     @Override
     @CircuitBreaker(name = "solapi", fallbackMethod = "fallback")
     public SendResult send(NotificationMessage message) {
-        String date = Instant.now().toString();
-        String salt = UUID.randomUUID().toString().replace("-", "");
-        String signature = generateSignature(date, salt);
-        String authHeader = String.format("HMAC-SHA256 apiKey=%s, date=%s, salt=%s, signature=%s",
-                solapiProperties.apiKey(), date, salt, signature);
+        SmsSendCommand command = new SmsSendCommand(
+                message.recipient(),
+                message.content()
+        );
+        return doSend(command);
+    }
 
+    // 실제 발송 로직 — sms 도메인의 Command만 사용
+    private SendResult doSend(SmsSendCommand command) {
         try {
-            Map<String, Object> body = buildRequestBody(message);
+            String date = Instant.now().toString();
+            String salt = UUID.randomUUID().toString().replace("-", "");
+            String signature = generateSignature(date, salt);
+            String authHeader = String.format("HMAC-SHA256 apiKey=%s, date=%s, salt=%s, signature=%s",
+                    solapiProperties.apiKey(), date, salt, signature);
+
+            Map<String, Object> body = buildRequestBody(command);
             String response = restClient.post()
                     .uri(API_URL)
                     .header(HttpHeaders.AUTHORIZATION, authHeader)
@@ -52,8 +62,9 @@ public class SolapiSender implements NotificationSender {
                     .body(String.class);
 
             return SendResult.success(extractMessageId(response), 8.0);
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
-            throw new RuntimeException("Solapi 요청 직렬화 실패", e);
+        } catch (Exception e) {
+            log.error("SolapiSender failed: recipient={}", command.recipient(), e);
+            return SendResult.failure(e.getMessage());
         }
     }
 
@@ -66,12 +77,11 @@ public class SolapiSender implements NotificationSender {
         return SendResult.failure(e.getMessage());
     }
 
-
-    private Map<String, Object> buildRequestBody(NotificationMessage message) {
+    private Map<String, Object> buildRequestBody(SmsSendCommand command) {
         return Map.of("message", Map.of(
-                "to", message.recipient(),
+                "to", command.recipient(),
                 "from", solapiProperties.fromNumber(),
-                "text", message.content() != null ? message.content() : ""
+                "text", command.content() != null ? command.content() : ""
         ));
     }
 

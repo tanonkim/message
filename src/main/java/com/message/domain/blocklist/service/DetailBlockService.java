@@ -1,7 +1,7 @@
 package com.message.domain.blocklist.service;
 
+import com.message.domain.blocklist.query.BlockCheckQuery;
 import com.message.domain.blocklist.repository.BlocklistRepository;
-import com.message.domain.notification.controller.request.NotificationRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,14 +13,10 @@ public class DetailBlockService {
 
     private final BlocklistRepository blocklistRepository;
 
-    public boolean isBlocked(NotificationRequest notificationRequest) {
-        NotificationRequest.RecipientDto recipient = notificationRequest.recipient();
-        if (recipient.phone() != null && blocklistRepository.existsByCellPhone(recipient.phone())) {
+    public boolean isBlocked(BlockCheckQuery blockCheckQuery) {
+        if (blockCheckQuery.phone() != null && blocklistRepository.existsByCellPhone(blockCheckQuery.phone())) {
             return true;
         }
-        if (recipient.email() != null && blocklistRepository.existsByEmail(recipient.email())) {
-            return true;
-        }
-        return false;
+        return blockCheckQuery.email() != null && blocklistRepository.existsByEmail(blockCheckQuery.email());
     }
 }
