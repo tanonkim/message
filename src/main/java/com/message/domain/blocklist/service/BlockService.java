@@ -1,6 +1,6 @@
 package com.message.domain.blocklist.service;
 
-import com.message.domain.notification.controller.request.NotificationRequest;
+import com.message.domain.blocklist.query.BlockCheckQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,7 +12,7 @@ public class BlockService {
 
     private final DetailBlockService detailBlockService;
 
-    public boolean isBlocked(NotificationRequest notificationRequest) {
-        return detailBlockService.isBlocked(notificationRequest);
+    public boolean isBlocked(BlockCheckQuery blockCheckQuery) {
+        return detailBlockService.isBlocked(blockCheckQuery);
     }
 }

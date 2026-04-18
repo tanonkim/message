@@ -1,5 +1,6 @@
 package com.message.domain.email.sender;
 
+import com.message.domain.email.command.EmailSendCommand;
 import com.message.domain.notification.message.NotificationMessage;
 import com.message.domain.notification.sender.NotificationSender;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -29,34 +30,60 @@ public class SesV2Sender implements NotificationSender {
                 .build();
     }
 
+    // notification 도메인 경계 어댑터 — NotificationMessage → EmailSendCommand 변환
     @Override
     @CircuitBreaker(name = "ses", fallbackMethod = "fallback")
     public SendResult send(NotificationMessage message) {
-        String toEmail = message.recipient();
+        EmailSendCommand command = new EmailSendCommand(
+                message.recipient(),
+                message.content(),
+                message.templateCode()
+        );
+        return doSend(command);
+    }
+
+    // 실제 발송 로직 — email 도메인의 Command만 사용
+    private SendResult doSend(EmailSendCommand command) {
+        String toEmail = command.recipient();
 
         // Stage 환경 발송 제한
         if ("stage".equals(activeProfile) && !stageEmailFilter.isAllowed(toEmail)) {
             log.warn("Stage email blocked (not in allowed domains): {}", toEmail);
             return SendResult.failure("Stage 환경에서 허용되지 않는 도메인입니다: " + toEmail);
         }
-        
-        SendEmailRequest request = SendEmailRequest.builder()
-                .fromEmailAddress(sesProperties.fromEmail())
-                .destination(Destination.builder().toAddresses(toEmail).build())
-                .content(EmailContent.builder()
-                        .simple(Message.builder()
-                                .subject(Content.builder().data(resolveSubject(message)).charset("UTF-8").build())
-                                .body(Body.builder()
-                                        .text(Content.builder().data(resolveBody(message)).charset("UTF-8").build())
-                                        .build())
-                                .build())
-                        .build())
-                .build();
 
-        SendEmailResponse response = sesV2Client.sendEmail(request);
-        String messageId = response.messageId();
-        log.info("SES email sent: messageId={}, to={}", messageId, toEmail);
-        return SendResult.success(messageId, 0.1);
+        try {
+            SendEmailRequest request = SendEmailRequest.builder()
+                    .fromEmailAddress(sesProperties.fromEmail())
+                    .destination(Destination.builder().toAddresses(toEmail).build())
+                    .content(EmailContent.builder()
+                            .simple(Message.builder()
+                                    .subject(Content.builder()
+                                            .data(resolveSubject(command))
+                                            .charset("UTF-8")
+                                            .build())
+                                    .body(Body.builder()
+                                            .text(Content.builder()
+                                                    .data(resolveBody(command))
+                                                    .charset("UTF-8")
+                                                    .build())
+                                            .build())
+                                    .build())
+                            .build())
+                    .build();
+
+            SendEmailResponse response = sesV2Client.sendEmail(request);
+            String messageId = response.messageId();
+            log.info("SES email sent: messageId={}, to={}", messageId, toEmail);
+            return SendResult.success(messageId, 0.1);
+
+        } catch (SesV2Exception e) {
+            log.error("SesV2Sender failed: to={}, code={}", toEmail, e.awsErrorDetails().errorCode(), e);
+            return SendResult.failure(e.awsErrorDetails().errorMessage());
+        } catch (Exception e) {
+            log.error("SesV2Sender unexpected error: to={}", toEmail, e);
+            return SendResult.failure(e.getMessage());
+        }
     }
 
     private SendResult fallback(NotificationMessage message, Throwable e) {
@@ -68,11 +95,11 @@ public class SesV2Sender implements NotificationSender {
         return SendResult.failure(e.getMessage());
     }
 
-    private String resolveSubject(NotificationMessage message) {
-        return message.templateCode() != null ? "[알림] " + message.templateCode() : "[알림]";
+    private String resolveSubject(EmailSendCommand command) {
+        return command.templateCode() != null ? "[알림] " + command.templateCode() : "[알림]";
     }
 
-    private String resolveBody(NotificationMessage message) {
-        return message.content() != null ? message.content() : "";
+    private String resolveBody(EmailSendCommand command) {
+        return command.content() != null ? command.content() : "";
     }
 }

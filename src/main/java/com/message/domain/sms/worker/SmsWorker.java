@@ -1,10 +1,9 @@
 package com.message.domain.sms.worker;
 
 import com.message.domain.notification.message.NotificationMessage;
-import com.message.domain.notification.repository.NotificationLogRepository;
 import com.message.domain.notification.sender.AbstractWorker;
+import com.message.domain.notification.service.NotificationLogCommandService;
 import com.message.domain.sms.sender.SolapiSender;
-import com.message.global.metrics.NotificationMetrics;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
@@ -14,9 +13,10 @@ public class SmsWorker extends AbstractWorker {
 
     private final SolapiSender solapiSender;
 
-    public SmsWorker(JmsTemplate jmsTemplate, NotificationLogRepository notificationLogRepository,
-                     NotificationMetrics notificationMetrics, SolapiSender solapiSender) {
-        super(jmsTemplate, notificationLogRepository, notificationMetrics);
+    public SmsWorker(JmsTemplate jmsTemplate,
+                     NotificationLogCommandService notificationLogCommandService,
+                     SolapiSender solapiSender) {
+        super(jmsTemplate, notificationLogCommandService);
         this.solapiSender = solapiSender;
     }
 

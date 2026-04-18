@@ -1,10 +1,9 @@
 package com.message.domain.push.worker;
 
 import com.message.domain.notification.message.NotificationMessage;
-import com.message.domain.notification.repository.NotificationLogRepository;
 import com.message.domain.notification.sender.AbstractWorker;
+import com.message.domain.notification.service.NotificationLogCommandService;
 import com.message.domain.push.sender.FingerpushSender;
-import com.message.global.metrics.NotificationMetrics;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
@@ -14,9 +13,10 @@ public class PushWorker extends AbstractWorker {
 
     private final FingerpushSender fingerpushSender;
 
-    public PushWorker(JmsTemplate jmsTemplate, NotificationLogRepository notificationLogRepository,
-                      NotificationMetrics notificationMetrics, FingerpushSender fingerpushSender) {
-        super(jmsTemplate, notificationLogRepository, notificationMetrics);
+    public PushWorker(JmsTemplate jmsTemplate,
+                      NotificationLogCommandService notificationLogCommandService,
+                      FingerpushSender fingerpushSender) {
+        super(jmsTemplate, notificationLogCommandService);
         this.fingerpushSender = fingerpushSender;
     }
 

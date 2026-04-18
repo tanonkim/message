@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-04-03T08:12:26.369Z",
+  "lastUpdated": "2026-04-18T05:20:15.964Z",
   "activeFeatures": [
     "config",
     "request",
@@ -145,7 +145,7 @@
       "documents": {},
       "timestamps": {
         "started": "2026-04-03T06:33:04.493Z",
-        "lastUpdated": "2026-04-03T07:07:41.398Z"
+        "lastUpdated": "2026-04-18T05:20:15.964Z"
       },
       "lastFile": "/Users/tanonkim/Documents/study/flab/backend/message/src/test/java/com/message/domain/push/sender/FingerpushSenderTest.java"
     },
@@ -210,7 +210,7 @@
   "session": {
     "startedAt": "2026-03-26T06:09:31.729Z",
     "onboardingCompleted": false,
-    "lastActivity": "2026-04-03T08:12:26.369Z"
+    "lastActivity": "2026-04-18T05:20:15.964Z"
   },
   "history": [
     {
@@ -534,6 +534,36 @@
     {
       "timestamp": "2026-04-03T08:12:26.369Z",
       "feature": "config",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-18T05:17:41.562Z",
+      "feature": "sender",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-18T05:18:06.034Z",
+      "feature": "sender",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-18T05:19:00.915Z",
+      "feature": "sender",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-18T05:19:36.446Z",
+      "feature": "sender",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-18T05:20:15.964Z",
+      "feature": "sender",
       "phase": "do",
       "action": "updated"
     }
